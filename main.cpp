@@ -7,6 +7,7 @@
 #include <View.h>
 #include <AboutWindow.h>
 #include <AppKit.h>
+#include <Looper.h>
 
 #include <GroupLayout.h>
 #include <LayoutBuilder.h>
@@ -21,10 +22,14 @@
 #include <Message.h>
 #include <Path.h>
 
+#include <iostream>
+
 const char* kSignature = "application/x-vnd.manakin-clock";
 const BRect kDefaultMainWindowRect = BRect(150, 150, 0, 0);
-const uint32 kSettingsMessage = 'Pref';
 const char* kSettingsFileName = "Manakin clock settings";
+
+const uint32 kSettingsMessage = 'Pref';
+const uint32 kTickMessage = 'tick';
 
 class App : public BApplication
 {
@@ -55,14 +60,55 @@ private:
 class ClockView : public BView
 {
 public:
-	ClockView(BRect frame);
+	ClockView(const char* name, BRect frame);
 };
 
-ClockView::ClockView(BRect frame)
+class TickLooper : public BLooper {
+public:
+			TickLooper(const char *name);
+	void		StartTimer();
+	virtual void	MessageReceived(BMessage* msg);
+private:
+	BMessageRunner* fRunner;
+};
+
+TickLooper::TickLooper(const char *name)
 	:
-	BView(frame, "Clock", B_FOLLOW_NONE,
+	BLooper(name)
+{
+}
+
+void
+TickLooper::StartTimer()
+{
+	BMessage msg(kTickMessage);
+	fRunner = new BMessageRunner(BMessenger(this),
+					&msg,
+					1000000); // 1 s
+}
+
+void
+TickLooper::MessageReceived(BMessage* msg)
+{
+	switch (msg->what) {
+		case kTickMessage:
+			std::cout << Name() << std::endl;
+			// Optionally notify the main window
+			// windowMessenger.SendMessage(MSG_UPDATE);
+			break;
+		default:
+			BLooper::MessageReceived(msg);
+	}
+}
+
+ClockView::ClockView(const char *name, BRect frame)
+	:
+	BView(frame, name, B_FOLLOW_NONE,
 		B_WILL_DRAW | B_FRAME_EVENTS | B_DRAW_ON_CHILDREN)
 {
+	TickLooper* worker = new TickLooper(Name());
+	worker->Run();
+	worker->StartTimer();
 }
 
 BMenuBar*
@@ -85,8 +131,8 @@ MainWindow::MainWindow()
 		B_NOT_RESIZABLE | B_NOT_ZOOMABLE | B_ASYNCHRONOUS_CONTROLS
 			| B_QUIT_ON_WINDOW_CLOSE | B_AUTO_UPDATE_SIZE_LIMITS)
 {
-	ClockView *clock1 = new ClockView(BRect(0, 0, 150, 75));
-	ClockView *clock2 = new ClockView(BRect(0, 0, 150, 75));
+	ClockView *clock1 = new ClockView("clock1", BRect(0, 0, 150, 75));
+	ClockView *clock2 = new ClockView("clock2", BRect(0, 0, 150, 75));
 
 	BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
 		.Add(_PrepareMenuBar())
