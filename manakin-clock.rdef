@@ -1,0 +1,13 @@
+resource app_signature "application/x-vnd.manakin-clock";
+
+resource app_version {
+    major  = 0,
+    middle = 1,
+    minor  = 0,
+    variety = B_APPV_FINAL,
+    internal = 0,
+    short_info = "Manakin Clock",
+    long_info = "An experimental clock"
+};
+
+resource app_flags B_SINGLE_LAUNCH;
