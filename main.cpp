@@ -12,8 +12,16 @@
 #include <MenuBar.h>
 #include <MenuItem.h>
 
+#include <Entry.h>
+#include <File.h>
+#include <FindDirectory.h>
+#include <Message.h>
+#include <Path.h>
+
 const char* kSignature = "application/x-vnd.manakin-clock";
 const BRect kDefaultMainWindowRect = BRect(150, 150, 0, 0);
+const uint32 kSettingsMessage = 'Pref';
+const char* kSettingsFileName = "Manakin clock settings";
 
 class App : public BApplication
 {
@@ -34,6 +42,8 @@ public:
 	virtual void	AboutRequested();
 
 private:
+	status_t	_LoadSettings(BMessage& m);
+	status_t	_SaveSettings();
 	BMenuBar*	_PrepareMenuBar(void);
 
 	BRect		fMainWindowRect;
@@ -65,7 +75,10 @@ MainWindow::MainWindow()
 
 	AddChild(_PrepareMenuBar());
 
-	fMainWindowRect = kDefaultMainWindowRect;
+	BMessage settings;
+	_LoadSettings(settings);
+	if (settings.FindRect("fMainWindowRect", &fMainWindowRect) != B_OK)
+		fMainWindowRect = kDefaultMainWindowRect;
 	MoveTo(fMainWindowRect.LeftTop());
 }
 
@@ -104,7 +117,58 @@ MainWindow::AboutRequested()
 bool
 MainWindow::QuitRequested()
 {
+	_SaveSettings();
 	return true;
+}
+
+status_t
+MainWindow::_LoadSettings(BMessage& m)
+{
+        BPath p;
+        BFile f;
+
+        if (find_directory(B_USER_SETTINGS_DIRECTORY, &p) != B_OK)
+                return B_ERROR;
+        p.Append(kSettingsFileName);
+
+        f.SetTo(p.Path(), B_READ_ONLY);
+        if (f.InitCheck() != B_OK)
+                return B_ERROR;
+
+        if (m.Unflatten(&f) != B_OK)
+                return B_ERROR;
+
+        if (m.what != kSettingsMessage)
+                return B_ERROR;
+
+        return B_OK;
+}
+
+status_t
+MainWindow::_SaveSettings()
+{
+        BPath p;
+        BFile f;
+        BMessage m(kSettingsMessage);
+
+        m.AddRect("fMainWindowRect", Frame());
+
+        app_info info;
+        be_roster->GetAppInfo("application/x-vnd.manakin-clock", &info);
+        m.AddRef("appLocation", &info.ref);
+
+        if (find_directory(B_USER_SETTINGS_DIRECTORY, &p) != B_OK)
+                return B_ERROR;
+        p.Append(kSettingsFileName);
+
+        f.SetTo(p.Path(), B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
+        if (f.InitCheck() != B_OK)
+                return B_ERROR;
+
+        if (m.Flatten(&f) != B_OK)
+                return B_ERROR;
+
+        return B_OK;
 }
 
 App::App(void)
