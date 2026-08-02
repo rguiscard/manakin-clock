@@ -60,14 +60,15 @@ private:
 class ClockView : public BView
 {
 public:
-	ClockView(const char* name, BRect frame);
+			ClockView(const char* name, BRect frame);
+	virtual void	MessageReceived(BMessage* msg);
+	virtual void	AttachedToWindow ();
 };
 
 class TickLooper : public BLooper {
 public:
 			TickLooper(const char *name);
-	void		StartTimer();
-	virtual void	MessageReceived(BMessage* msg);
+	void		StartTimer(BMessenger replyTo);
 private:
 	BMessageRunner* fRunner;
 };
@@ -79,26 +80,12 @@ TickLooper::TickLooper(const char *name)
 }
 
 void
-TickLooper::StartTimer()
+TickLooper::StartTimer(BMessenger replyTo)
 {
 	BMessage msg(kTickMessage);
-	fRunner = new BMessageRunner(BMessenger(this),
+	fRunner = new BMessageRunner(replyTo,
 					&msg,
 					1000000); // 1 s
-}
-
-void
-TickLooper::MessageReceived(BMessage* msg)
-{
-	switch (msg->what) {
-		case kTickMessage:
-			std::cout << Name() << std::endl;
-			// Optionally notify the main window
-			// windowMessenger.SendMessage(MSG_UPDATE);
-			break;
-		default:
-			BLooper::MessageReceived(msg);
-	}
 }
 
 ClockView::ClockView(const char *name, BRect frame)
@@ -106,9 +93,26 @@ ClockView::ClockView(const char *name, BRect frame)
 	BView(frame, name, B_FOLLOW_NONE,
 		B_WILL_DRAW | B_FRAME_EVENTS | B_DRAW_ON_CHILDREN)
 {
+}
+
+void
+ClockView::AttachedToWindow ()
+{
 	TickLooper* worker = new TickLooper(Name());
 	worker->Run();
-	worker->StartTimer();
+	worker->StartTimer(BMessenger(this));
+}
+
+void
+ClockView::MessageReceived(BMessage* msg)
+{
+	switch (msg->what) {
+		case kTickMessage:
+			std::cout << "Tick to " << Name() << std::endl;
+			break;
+		default:
+			BView::MessageReceived(msg);
+	}
 }
 
 BMenuBar*
