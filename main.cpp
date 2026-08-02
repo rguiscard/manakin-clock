@@ -8,6 +8,9 @@
 #include <AboutWindow.h>
 #include <AppKit.h>
 
+#include <GroupLayout.h>
+#include <LayoutBuilder.h>
+
 #include <Menu.h>
 #include <MenuBar.h>
 #include <MenuItem.h>
@@ -49,6 +52,19 @@ private:
 	BRect		fMainWindowRect;
 };
 
+class ClockView : public BView
+{
+public:
+	ClockView(BRect frame);
+};
+
+ClockView::ClockView(BRect frame)
+	:
+	BView(frame, "Clock", B_FOLLOW_NONE,
+		B_WILL_DRAW | B_FRAME_EVENTS | B_DRAW_ON_CHILDREN)
+{
+}
+
 BMenuBar*
 MainWindow::_PrepareMenuBar(void)
 {
@@ -69,11 +85,16 @@ MainWindow::MainWindow()
 		B_NOT_RESIZABLE | B_NOT_ZOOMABLE | B_ASYNCHRONOUS_CONTROLS
 			| B_QUIT_ON_WINDOW_CLOSE | B_AUTO_UPDATE_SIZE_LIMITS)
 {
-	BGroupLayout* root = new BGroupLayout(B_VERTICAL);
-	root->SetSpacing(0);
-	SetLayout(root);
+	ClockView *clock1 = new ClockView(BRect(0, 0, 150, 75));
+	ClockView *clock2 = new ClockView(BRect(0, 0, 150, 75));
 
-	AddChild(_PrepareMenuBar());
+	BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
+		.Add(_PrepareMenuBar())
+		.AddGroup(B_VERTICAL)
+			.Add(clock1)
+			.Add(clock2)
+			.End()
+		.End();
 
 	BMessage settings;
 	_LoadSettings(settings);
