@@ -154,6 +154,14 @@ ClockView::Draw(BRect updateRect)
 	SetHighColor(220,220,220);
 	FillRect(box);
 
+	MovePenTo(5, 20);
+	SetHighColor(200, 200, 200);
+	if (timeZone == NULL) {
+		DrawString("Local");
+	} else {
+		DrawString(timeZone->Name());
+	}
+
 	uint32 height = (Bounds().Height()-header_h)*0.8;
 	uint32 width = height/2;
 	uint32 space = height/8;
@@ -180,7 +188,6 @@ ClockView::MessageReceived(BMessage* msg)
 		case kTickMessage:
 		{
 			count++;
-			std::cout << "Tick to " << Name() << " " << count << std::endl;
 			Invalidate();
 			break;
 		}
