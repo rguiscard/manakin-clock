@@ -22,6 +22,9 @@
 #include <Message.h>
 #include <Path.h>
 
+#include <DateTime.h>
+#include <TimeZone.h>
+
 #include <iostream>
 
 #include "DigitalClock.h"
@@ -66,8 +69,10 @@ public:
 	virtual void	MessageReceived(BMessage* msg);
 	virtual void	AttachedToWindow ();
 	virtual void	Draw(BRect updateRect);
+	status_t	SetTimeZone(const char* name);
 private:
-	 uint32	count;
+	uint32		count;
+	BTimeZone*	timeZone;
 };
 
 class TickLooper : public BLooper {
@@ -112,16 +117,52 @@ ClockView::AttachedToWindow ()
 void
 ClockView::Draw(BRect updateRect)
 {
-	std::cout << "ClockView::Draw " << Bounds().Width() << " " << Bounds().Height() << std::endl;
+	int hour = 0;
+	int minute = 0;
+	if (timeZone != NULL) {
+		int offset_in_minute = std::floor(timeZone->OffsetFromGMT()/60);
+		BTime gmt = BTime::CurrentTime(B_GMT_TIME);
+		int gmt_in_minute = gmt.Hour()*60+gmt.Minute();
+		int gmt_offseted = gmt_in_minute+offset_in_minute;
+
+		if (gmt_offseted < 0) {
+			gmt_offseted += 24*60;
+		}
+
+		int hour_offseted = std::floor(gmt_offseted / 60);
+		if (hour_offseted > 24) {
+			hour_offseted -= 24;
+		}
+		int minute_offseted = gmt_offseted % 60;
+
+		hour = hour_offseted;
+		minute = minute_offseted;
+	} else {
+		BTime now = BTime::CurrentTime(B_LOCAL_TIME);
+		hour = now.Hour();
+		minute = now.Minute();
+	}
+
 	SetHighColor(220,220,220);
 	FillRect(Bounds());
+	uint32 height = Bounds().Height()*0.8;
+	uint32 width = height/2;
+	uint32 space = height/8;
 //	DigitalClock disp(Bounds().Width()*0.1f, Bounds().Height()*0.6f, 6);
-	DigitalClock disp(25, 50, 6);
-	float x = 20;
-	disp.DrawDigit(this, BPoint(x,20), 0);
+	DigitalClock disp(width, height, height/10);
+	float x = space;
+	disp.DrawDigit(this, BPoint(x,space), std::floor(hour/10));
+	x += width+space;
+	disp.DrawDigit(this, BPoint(x,space), hour%10);
+	x += width+space*2;
+	disp.DrawColon(this, BPoint(x,space), true);
+	x += space*2;
 
-	x += 30;
-	disp.DrawDigit(this, BPoint(x,20), count%10);
+	disp.DrawDigit(this, BPoint(x,space), std::floor(minute/10));
+	x += width+space;
+	disp.DrawDigit(this, BPoint(x,space), minute%10);
+	x += width+space*3;
+	disp.DrawDigit(this, BPoint(x,space), count%10);
 }
 
 void
@@ -138,6 +179,17 @@ ClockView::MessageReceived(BMessage* msg)
 		default:
 			BView::MessageReceived(msg);
 	}
+}
+
+status_t
+ClockView::SetTimeZone(const char* name)
+{
+	timeZone = new BTimeZone(name);
+	status_t status = timeZone->InitCheck();
+	if (status != B_OK) {
+		timeZone = NULL;
+	}
+	return status;
 }
 
 BMenuBar*
@@ -160,8 +212,9 @@ MainWindow::MainWindow()
 		B_NOT_RESIZABLE | B_NOT_ZOOMABLE | B_ASYNCHRONOUS_CONTROLS
 			| B_QUIT_ON_WINDOW_CLOSE | B_AUTO_UPDATE_SIZE_LIMITS)
 {
-	ClockView *clock1 = new ClockView("clock1", BRect(0, 0, 150, 75));
-	ClockView *clock2 = new ClockView("clock2", BRect(0, 0, 150, 75));
+	ClockView *clock1 = new ClockView("clock1", BRect(0, 0, 300, 100));
+	ClockView *clock2 = new ClockView("clock2", BRect(0, 0, 300, 100));
+	clock2->SetTimeZone("Asia/Tokyo");
 
 	BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
 		.Add(_PrepareMenuBar())

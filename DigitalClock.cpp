@@ -127,8 +127,8 @@ DigitalClock:: DigitalClock(float width, float height, float t)
 	fHeight=height;
 	fThickness=t;
 
-	fOnColor={255,0,0,255};
-	fOffColor={200,200,200,255};
+	fOnColor={55,55,255,255};
+	fOffColor={220,220,220,255};
 
 	float h = width - 2*t;
 	float v = (height - 3*t)/2;
