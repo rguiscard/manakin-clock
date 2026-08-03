@@ -24,6 +24,8 @@
 
 #include <iostream>
 
+#include "DigitalClock.h"
+
 const char* kSignature = "application/x-vnd.manakin-clock";
 const BRect kDefaultMainWindowRect = BRect(150, 150, 0, 0);
 const char* kSettingsFileName = "Manakin clock settings";
@@ -63,6 +65,9 @@ public:
 			ClockView(const char* name, BRect frame);
 	virtual void	MessageReceived(BMessage* msg);
 	virtual void	AttachedToWindow ();
+	virtual void	Draw(BRect updateRect);
+private:
+	 uint32	count;
 };
 
 class TickLooper : public BLooper {
@@ -93,6 +98,7 @@ ClockView::ClockView(const char *name, BRect frame)
 	BView(frame, name, B_FOLLOW_NONE,
 		B_WILL_DRAW | B_FRAME_EVENTS | B_DRAW_ON_CHILDREN)
 {
+	count = 0;
 }
 
 void
@@ -104,12 +110,31 @@ ClockView::AttachedToWindow ()
 }
 
 void
+ClockView::Draw(BRect updateRect)
+{
+	std::cout << "ClockView::Draw " << Bounds().Width() << " " << Bounds().Height() << std::endl;
+	SetHighColor(220,220,220);
+	FillRect(Bounds());
+//	DigitalClock disp(Bounds().Width()*0.1f, Bounds().Height()*0.6f, 6);
+	DigitalClock disp(25, 50, 6);
+	float x = 20;
+	disp.DrawDigit(this, BPoint(x,20), 0);
+
+	x += 30;
+	disp.DrawDigit(this, BPoint(x,20), count%10);
+}
+
+void
 ClockView::MessageReceived(BMessage* msg)
 {
 	switch (msg->what) {
 		case kTickMessage:
-			std::cout << "Tick to " << Name() << std::endl;
+		{
+			count++;
+			std::cout << "Tick to " << Name() << " " << count << std::endl;
+			Invalidate();
 			break;
+		}
 		default:
 			BView::MessageReceived(msg);
 	}
