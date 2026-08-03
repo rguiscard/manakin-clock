@@ -117,6 +117,12 @@ ClockView::AttachedToWindow ()
 void
 ClockView::Draw(BRect updateRect)
 {
+	int header_h = 25;
+	BRect box = Bounds();
+	box.bottom = box.top+header_h;
+	SetHighColor(25, 25, 25);
+	FillRect(box);
+
 	int hour = 0;
 	int minute = 0;
 	if (timeZone != NULL) {
@@ -143,26 +149,28 @@ ClockView::Draw(BRect updateRect)
 		minute = now.Minute();
 	}
 
+	box = Bounds();
+	box.top = header_h;
 	SetHighColor(220,220,220);
-	FillRect(Bounds());
-	uint32 height = Bounds().Height()*0.8;
+	FillRect(box);
+
+	uint32 height = (Bounds().Height()-header_h)*0.8;
 	uint32 width = height/2;
 	uint32 space = height/8;
-//	DigitalClock disp(Bounds().Width()*0.1f, Bounds().Height()*0.6f, 6);
 	DigitalClock disp(width, height, height/10);
 	float x = space;
-	disp.DrawDigit(this, BPoint(x,space), std::floor(hour/10));
+	disp.DrawDigit(this, BPoint(x,header_h+space), std::floor(hour/10));
 	x += width+space;
-	disp.DrawDigit(this, BPoint(x,space), hour%10);
+	disp.DrawDigit(this, BPoint(x,header_h+space), hour%10);
 	x += width+space*2;
-	disp.DrawColon(this, BPoint(x,space), true);
+	disp.DrawColon(this, BPoint(x,header_h+space), true);
 	x += space*2;
 
-	disp.DrawDigit(this, BPoint(x,space), std::floor(minute/10));
+	disp.DrawDigit(this, BPoint(x,header_h+space), std::floor(minute/10));
 	x += width+space;
-	disp.DrawDigit(this, BPoint(x,space), minute%10);
+	disp.DrawDigit(this, BPoint(x,header_h+space), minute%10);
 	x += width+space*3;
-	disp.DrawDigit(this, BPoint(x,space), count%10);
+	disp.DrawDigit(this, BPoint(x,header_h+space), count%10);
 }
 
 void
