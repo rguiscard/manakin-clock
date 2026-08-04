@@ -10,6 +10,7 @@
 
 #include <GroupLayout.h>
 #include <LayoutBuilder.h>
+#include <SeparatorView.h>
 
 #include <Menu.h>
 #include <MenuBar.h>
@@ -86,7 +87,9 @@ MainWindow::MainWindow()
 		.Add(_PrepareMenuBar())
 		.AddGroup(B_VERTICAL)
 			.Add(clock1)
+			.Add(new BSeparatorView(B_HORIZONTAL))
 			.Add(clock2)
+			.Add(new BSeparatorView(B_HORIZONTAL))
 			.Add(clock3)
 			.End()
 		.End();

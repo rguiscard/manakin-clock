@@ -1,4 +1,5 @@
 #include <View.h>
+#include <StringView.h>
 #include "ClockView.h"
 
 class DigitalClock
@@ -57,6 +58,10 @@ private:
 class DigitalClockView : public ClockView
 {
 public:
-			DigitalClockView(const char* name, BRect frame);
-	virtual void    Draw(BRect updateRect);
+				DigitalClockView(const char* name, BRect frame);
+	virtual void		Draw(BRect updateRect);
+	virtual status_t	SetTimeZone(const char* name);
+private:
+	BStringView*	fHeader;
+	BView*		fClock;
 };

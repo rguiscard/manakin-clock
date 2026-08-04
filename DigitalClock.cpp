@@ -1,4 +1,5 @@
 #include <DateTime.h>
+#include <LayoutBuilder.h>
 
 #include "DigitalClock.h"
 
@@ -144,14 +145,12 @@ DigitalClock:: DigitalClock(float width, float height, float t)
 	fSegments[6]=MakeHorizontal(t,t+v,h,t);
 }
 
-
 void
 DigitalClock::SetColors(rgb_color on, rgb_color off)
 {
 	fOnColor=on;
 	fOffColor=off;
 }
-
 
 void
 DigitalClock::DrawMask(BView* view,
@@ -237,17 +236,31 @@ DigitalClockView::DigitalClockView(const char *name, BRect frame)
         :
         ClockView(name, frame)
 {
+	fHeader = new BStringView("header", "Local Time");
+	fClock = new BView("clock", B_WILL_DRAW | B_SUPPORTS_LAYOUT);
+	BSize minimumSize(150, 50);
+
+        // 3. Apply the constraint to the button
+        fClock->SetExplicitMinSize(BSize(300, 100));
+
+        BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
+		.SetInsets(B_USE_SMALL_INSETS)
+		.Add(fHeader)
+		.Add(fClock)
+		.End();
+}
+
+status_t
+DigitalClockView::SetTimeZone(const char* name)
+{
+	status_t status = ClockView::SetTimeZone(name);
+	fHeader->SetText(timeZone->Name());
+	return status;
 }
 
 void
 DigitalClockView::Draw(BRect updateRect)
 {
-	int header_h = 25;
-	BRect box = Bounds();
-	box.bottom = box.top+header_h;
-	SetHighColor(25, 25, 25);
-	FillRect(box);
-
 	int hour = 0;
 	int minute = 0;
 	if (timeZone != NULL) {
@@ -274,35 +287,25 @@ DigitalClockView::Draw(BRect updateRect)
 		minute = now.Minute();
 	}
 
-	box = Bounds();
-	box.top = header_h;
-	SetHighColor(220,220,220);
-	FillRect(box);
-
-	MovePenTo(5, 20);
-	SetHighColor(200, 200, 200);
-	if (timeZone == NULL) {
-		DrawString("Local");
-	} else {
-		DrawString(timeZone->Name());
-	}
-
-	uint32 height = (Bounds().Height()-header_h)*0.8;
+	uint32 height = fClock->Bounds().Height()*0.8;
 	uint32 width = height/2;
 	uint32 space = height/8;
 
+//	fClock->SetHighColor(200, 200, 200);
+//	fClock->FillRect(fClock->Bounds());
+
 	DigitalClock disp(width, height, height/10);
 	float x = space;
-	disp.DrawDigit(this, BPoint(x,header_h+space), std::floor(hour/10));
+	disp.DrawDigit(fClock, BPoint(x,space), std::floor(hour/10));
 	x += width+space;
-	disp.DrawDigit(this, BPoint(x,header_h+space), hour%10);
+	disp.DrawDigit(fClock, BPoint(x,space), hour%10);
 	x += width+space*2;
-	disp.DrawColon(this, BPoint(x,header_h+space), true);
+	disp.DrawColon(fClock, BPoint(x,space), true);
 	x += space*2;
 
-	disp.DrawDigit(this, BPoint(x,header_h+space), std::floor(minute/10));
+	disp.DrawDigit(fClock, BPoint(x,space), std::floor(minute/10));
 	x += width+space;
-	disp.DrawDigit(this, BPoint(x,header_h+space), minute%10);
-	x += width+space*3;
-	disp.DrawDigit(this, BPoint(x,header_h+space), count%10);
+	disp.DrawDigit(fClock, BPoint(x,space), minute%10);
+	x += width+space*2;
+	disp.DrawDigit(fClock, BPoint(x,space), count%10);
 }
