@@ -24,7 +24,6 @@
 #include <iostream>
 
 #include "Message.h"
-#include "ClockView.h"
 #include "DigitalClock.h"
 
 const char* kSignature = "application/x-vnd.manakin-clock";
@@ -77,10 +76,10 @@ MainWindow::MainWindow()
 		B_NOT_RESIZABLE | B_NOT_ZOOMABLE | B_ASYNCHRONOUS_CONTROLS
 			| B_QUIT_ON_WINDOW_CLOSE | B_AUTO_UPDATE_SIZE_LIMITS)
 {
-	ClockView *clock1 = new ClockView("clock1", BRect(0, 0, 300, 100));
-	ClockView *clock2 = new ClockView("clock2", BRect(0, 0, 300, 100));
+	DigitalClockView *clock1 = new DigitalClockView("clock1", BRect(0, 0, 300, 100));
+	DigitalClockView *clock2 = new DigitalClockView("clock2", BRect(0, 0, 300, 100));
 	clock2->SetTimeZone("Asia/Tokyo");
-	ClockView *clock3 = new ClockView("clock3", BRect(0, 0, 300, 100));
+	DigitalClockView *clock3 = new DigitalClockView("clock3", BRect(0, 0, 300, 100));
 	clock3->SetTimeZone("America/New_York");
 
 	BLayoutBuilder::Group<>(this, B_VERTICAL, 0)

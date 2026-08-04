@@ -1,5 +1,7 @@
 #include <View.h>
 #include <TimeZone.h>
+#include <Looper.h>
+#include <MessageRunner.h>
 
 class TickLooper : public BLooper {
 public:
@@ -15,9 +17,9 @@ public:
 			ClockView(const char* name, BRect frame);
 	virtual void	MessageReceived(BMessage* msg);
 	virtual void	AttachedToWindow ();
-	virtual void	Draw(BRect updateRect);
 	status_t	SetTimeZone(const char* name);
-private:
-	uint32		count;
+protected:
 	BTimeZone*	timeZone;
+	uint32		count;
+private:
 };

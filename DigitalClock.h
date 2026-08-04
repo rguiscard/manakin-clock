@@ -1,4 +1,5 @@
 #include <View.h>
+#include "ClockView.h"
 
 class DigitalClock
 {
@@ -51,4 +52,11 @@ private:
 
 	rgb_color fOnColor;
 	rgb_color fOffColor;
+};
+
+class DigitalClockView : public ClockView
+{
+public:
+			DigitalClockView(const char* name, BRect frame);
+	virtual void    Draw(BRect updateRect);
 };
