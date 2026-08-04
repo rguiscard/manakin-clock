@@ -20,6 +20,5 @@ public:
 	status_t	SetTimeZone(const char* name);
 protected:
 	BTimeZone*	timeZone;
-	uint32		count;
 private:
 };

@@ -17,7 +17,7 @@ TickLooper::StartTimer(BMessenger replyTo)
         BMessage msg(kTickMessage);
         fRunner = new BMessageRunner(replyTo,
                                         &msg,
-                                        1000000); // 1 s
+                                        5000000); // 1 s
 }
 
 ClockView::ClockView(const char *name, BRect frame)
@@ -25,7 +25,6 @@ ClockView::ClockView(const char *name, BRect frame)
 	BView(frame, name, B_FOLLOW_NONE,
 		B_WILL_DRAW | B_FRAME_EVENTS | B_DRAW_ON_CHILDREN)
 {
-	count = 0;
 }
 
 void
@@ -42,7 +41,6 @@ ClockView::MessageReceived(BMessage* msg)
 	switch (msg->what) {
 		case kTickMessage:
 		{
-			count++;
 			Invalidate();
 			break;
 		}

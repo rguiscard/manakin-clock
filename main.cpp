@@ -77,10 +77,10 @@ MainWindow::MainWindow()
 		B_NOT_RESIZABLE | B_NOT_ZOOMABLE | B_ASYNCHRONOUS_CONTROLS
 			| B_QUIT_ON_WINDOW_CLOSE | B_AUTO_UPDATE_SIZE_LIMITS)
 {
-	DigitalClockView *clock1 = new DigitalClockView("clock1", BRect(0, 0, 300, 100));
-	DigitalClockView *clock2 = new DigitalClockView("clock2", BRect(0, 0, 300, 100));
+	DigitalClockView *clock1 = new DigitalClockView("clock1", BRect(0, 0, 220, 100));
+	DigitalClockView *clock2 = new DigitalClockView("clock2", BRect(0, 0, 220, 100));
 	clock2->SetTimeZone("Asia/Tokyo");
-	DigitalClockView *clock3 = new DigitalClockView("clock3", BRect(0, 0, 300, 100));
+	DigitalClockView *clock3 = new DigitalClockView("clock3", BRect(0, 0, 220, 100));
 	clock3->SetTimeZone("America/New_York");
 
 	BLayoutBuilder::Group<>(this, B_VERTICAL, 0)

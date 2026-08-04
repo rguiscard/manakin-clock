@@ -241,7 +241,7 @@ DigitalClockView::DigitalClockView(const char *name, BRect frame)
 	BSize minimumSize(150, 50);
 
         // 3. Apply the constraint to the button
-        fClock->SetExplicitMinSize(BSize(300, 100));
+        fClock->SetExplicitMinSize(BSize(250, 100));
 
         BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
 		.SetInsets(B_USE_SMALL_INSETS)
@@ -306,6 +306,4 @@ DigitalClockView::Draw(BRect updateRect)
 	disp.DrawDigit(fClock, BPoint(x,space), std::floor(minute/10));
 	x += width+space;
 	disp.DrawDigit(fClock, BPoint(x,space), minute%10);
-	x += width+space*2;
-	disp.DrawDigit(fClock, BPoint(x,space), count%10);
 }
